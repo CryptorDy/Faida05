@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
+// @ts-ignore - В версии react-router-dom 7.x типы могут отличаться от фактических экспортов
 import { useParams, useNavigate } from 'react-router-dom';
-import { fetchProductById } from '../services/api';
 import { Calculator, ArrowLeft } from 'lucide-react';
 import WhatsAppButton from '../components/WhatsAppButton';
-import { Product } from '../data/products';
+import { Product } from '../types/api';
+import { ApiService } from '../services/api';
 
 const ProductPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   const [selectedTerm, setSelectedTerm] = useState(3);
   const [initialPayment, setInitialPayment] = useState(0);
@@ -20,7 +22,13 @@ const ProductPage: React.FC = () => {
       if (id) {
         setIsLoading(true);
         try {
-          const productData = await fetchProductById(parseInt(id));
+          const productId = parseInt(id, 10);
+          if (isNaN(productId)) {
+            setError('Неверный формат идентификатора товара');
+            return;
+          }
+          
+          const productData = await ApiService.getProductByIdAsync(productId);
           setProduct(productData);
           
           if (productData) {
@@ -29,8 +37,10 @@ const ProductPage: React.FC = () => {
             setInitialPayment(initialValue);
             setInitialPaymentInput(initialValue.toString());
           }
+          setError(null);
         } catch (error) {
-          console.error('Error loading product:', error);
+          console.error('Ошибка при загрузке товара:', error);
+          setError('Не удалось загрузить информацию о товаре. Пожалуйста, попробуйте позже.');
         } finally {
           setIsLoading(false);
         }
@@ -43,7 +53,23 @@ const ProductPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
-        <p className="text-gray-600">Загрузка...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+        <p className="text-gray-600 mt-4">Загрузка товара...</p>
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <h2 className="text-2xl font-semibold mb-4">Ошибка</h2>
+        <p className="text-gray-600 mb-8">{error}</p>
+        <button 
+          onClick={() => navigate('/catalog')}
+          className="bg-indigo-600 text-white hover:bg-indigo-700 px-6 py-2 rounded-lg font-medium"
+        >
+          Вернуться в каталог
+        </button>
       </div>
     );
   }
@@ -131,7 +157,7 @@ const ProductPage: React.FC = () => {
   
   // Create WhatsApp message with product details
   const createWhatsAppMessage = () => {
-    return `Ас салам алейкум! Меня интересует товар: ${product.name} за ${product.price.toLocaleString()} ₽`;
+    return `Ас салам алейкум! Меня интересует товар: ${product.name} за ${product.price.toLocaleString('ru-RU')} ₽`;
   };
   
   // Calculate minimum initial payment (25% of product price)
@@ -152,36 +178,29 @@ const ProductPage: React.FC = () => {
         <div className="md:flex">
           {/* Product image with WhatsApp icon in bottom-right corner */}
           <div className="md:w-1/2 bg-gray-100 flex items-center justify-center p-8 relative">
-            <img src={product.image} alt={product.name} className="max-h-80 mx-auto" />
+            <img 
+              src={product.imageUrl} 
+              alt={product.name} 
+              className="max-h-80 mx-auto"
+              onError={(e) => {
+                // Fallback image if the product image fails to load
+                (e.target as HTMLImageElement).src = 'https://placehold.co/600x400?text=Нет+изображения';
+              }} 
+            />
             
             {/* WhatsApp icon in bottom-right corner of image */}
             <div className="absolute bottom-4 right-4">
-              <WhatsAppButton 
-                phoneNumber="+79634096111"
-                message={createWhatsAppMessage()}
-                className="rounded-full p-2 shadow-md bg-green-500 hover:bg-green-600"
-              >
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  viewBox="0 0 24 24" 
-                  fill="currentColor" 
-                  className="w-6 h-6"
-                >
-                  <path 
-                    d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"
-                  />
-                </svg>
-              </WhatsAppButton>
+              <WhatsAppButton />
             </div>
           </div>
           
           {/* Product details */}
           <div className="md:w-1/2 p-6 md:p-8">
-            <div className="text-sm text-gray-500 mb-1">{product.category}</div>
+            <div className="text-sm text-gray-500 mb-1">{product.categoryName || 'Товар'}</div>
             <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
             <p className="text-gray-600 mb-6">{product.description}</p>
             
-            <div className="text-3xl font-bold text-indigo-600 mb-6">{product.price.toLocaleString()} ₽</div>
+            <div className="text-3xl font-bold text-indigo-600 mb-6">{product.price.toLocaleString('ru-RU')} ₽</div>
             
             {/* Installment plan */}
             <div className="bg-indigo-50 rounded-lg p-4 mb-6">
@@ -212,8 +231,8 @@ const ProductPage: React.FC = () => {
                   className="w-full h-2 bg-indigo-200 rounded-lg appearance-none cursor-pointer"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span>Мин: {minInitialPayment.toLocaleString()} ₽</span>
-                  <span>Макс: {product.price.toLocaleString()} ₽</span>
+                  <span>Мин: {minInitialPayment.toLocaleString('ru-RU')} ₽</span>
+                  <span>Макс: {product.price.toLocaleString('ru-RU')} ₽</span>
                 </div>
               </div>
               
@@ -252,24 +271,20 @@ const ProductPage: React.FC = () => {
                 </div>
               </div>
               
-              {/* Payment Info */}
-              <div className="grid grid-cols-2 gap-3 mb-3">
-                <div className="bg-white/80 rounded-lg p-3">
-                  <div className="text-gray-600 text-xs">Ежемесячный платеж:</div>
-                  <div className="text-base font-bold text-indigo-700">
-                    {monthlyPayment.toLocaleString()} ₽/мес
-                  </div>
+              {/* Results */}
+              <div className="bg-white rounded-lg p-3 space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Ежемесячный платеж:</span>
+                  <span className="font-medium">{monthlyPayment.toLocaleString('ru-RU')} ₽</span>
                 </div>
-                <div className="bg-white/80 rounded-lg p-3">
-                  <div className="text-gray-600 text-xs">Итоговая стоимость:</div>
-                  <div className="text-base font-bold text-indigo-700">
-                    {totalCost.toLocaleString()} ₽
-                  </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Наценка:</span>
+                  <span className="font-medium">{markup.toLocaleString('ru-RU')} ₽</span>
                 </div>
-              </div>
-              
-              <div className="text-xs text-gray-500 italic">
-                Торговая наценка: {markup.toLocaleString()} ₽
+                <div className="flex justify-between items-center font-medium">
+                  <span className="text-sm">Итого к оплате:</span>
+                  <span>{totalCost.toLocaleString('ru-RU')} ₽</span>
+                </div>
               </div>
             </div>
             

@@ -1,47 +1,131 @@
-import { Product, Category } from '../data/products';
+import { Product, Category, ApiResponse } from '../types/api';
 
-// Mock data for development
-import { products as mockProducts, categories as mockCategories } from '../data/products';
+const API_BASE_URL = 'http://176.124.214.240';
 
-// Simulate API delay
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-// Fetch all categories
-export const fetchCategories = async (): Promise<Category[]> => {
-  // Simulate API call
-  await delay(800);
-  return mockCategories;
+/**
+ * Функция для обработки ошибок запросов к API
+ */
+const handleApiError = (error: any): never => {
+  console.error('API Error:', error);
+  throw new Error(error.message || 'Ошибка при выполнении запроса к API');
 };
 
-// Fetch all products
-export const fetchProducts = async (): Promise<Product[]> => {
-  // Simulate API call
-  await delay(1000);
-  return mockProducts;
-};
-
-// Fetch products by category
-export const fetchProductsByCategory = async (categoryId: number): Promise<Product[]> => {
-  // Simulate API call
-  await delay(1000);
-  return mockProducts.filter(product => {
-    const category = mockCategories.find(c => c.id === categoryId);
-    return category && product.category === category.name;
-  });
-};
-
-// Fetch product by ID
-export const fetchProductById = async (id: number): Promise<Product | null> => {
-  // Simulate API call
-  await delay(800);
-  const product = mockProducts.find(p => p.id === id);
-  return product || null;
-};
-
-// Fetch popular products
-export const fetchPopularProducts = async (limit: number = 4): Promise<Product[]> => {
-  // Simulate API call
-  await delay(1000);
-  // For mock data, we'll just return the first few products
-  return mockProducts.slice(0, limit);
-};
+/**
+ * Класс для работы с API товаров и категорий
+ */
+export class ApiService {
+  /**
+   * Получение списка всех товаров
+   */
+  static async getAllProductsAsync(): Promise<Product[]> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/products`);
+      
+      if (!response.ok) {
+        throw new Error(`Ошибка HTTP: ${response.status}`);
+      }
+      
+      const data: ApiResponse<Product[]> = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.message || 'Не удалось получить список товаров');
+      }
+      
+      return data.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  }
+  
+  /**
+   * Получение товаров по категории
+   */
+  static async getProductsByCategoryAsync(categoryId: number): Promise<Product[]> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/products/category/${categoryId}`);
+      
+      if (!response.ok) {
+        throw new Error(`Ошибка HTTP: ${response.status}`);
+      }
+      
+      const data: ApiResponse<Product[]> = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.message || `Не удалось получить товары категории ${categoryId}`);
+      }
+      
+      return data.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  }
+  
+  /**
+   * Получение популярных товаров
+   */
+  static async getPopularProductsAsync(): Promise<Product[]> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/products/popular`);
+      
+      if (!response.ok) {
+        throw new Error(`Ошибка HTTP: ${response.status}`);
+      }
+      
+      const data: ApiResponse<Product[]> = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.message || 'Не удалось получить популярные товары');
+      }
+      
+      return data.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  }
+  
+  /**
+   * Получение товара по ID
+   */
+  static async getProductByIdAsync(id: number): Promise<Product> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/products/${id}`);
+      
+      if (!response.ok) {
+        throw new Error(`Ошибка HTTP: ${response.status}`);
+      }
+      
+      const data: ApiResponse<Product> = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.message || `Не удалось получить товар с ID ${id}`);
+      }
+      
+      return data.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  }
+  
+  /**
+   * Получение списка всех категорий
+   */
+  static async getAllCategoriesAsync(): Promise<Category[]> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/categories`);
+      
+      if (!response.ok) {
+        throw new Error(`Ошибка HTTP: ${response.status}`);
+      }
+      
+      const data: ApiResponse<Category[]> = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.message || 'Не удалось получить список категорий');
+      }
+      
+      return data.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  }
+}

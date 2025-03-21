@@ -125,7 +125,7 @@ const MainPageCalculator: React.FC = () => {
                 <span className="text-white mr-1 md:mr-2 text-xs md:text-base">₽</span>
                 <span className="text-white text-sm md:text-base">Стоимость товара</span>
               </div>
-              <div className="bg-[#4F5AE5]/50 py-1 px-2 md:px-3 rounded-lg flex items-center">
+              <div className="bg-white/30 py-1 px-2 md:px-3 rounded-lg flex items-center hover:bg-white/40 transition-colors">
                 <input
                   type="text"
                   value={formatNumber(productPrice)}
@@ -156,7 +156,7 @@ const MainPageCalculator: React.FC = () => {
                 <span className="text-white text-sm md:text-base">Первоначальный взнос</span>
                 <span className="text-xs md:text-sm text-white/80 ml-1">(минимум 25%)</span>
               </div>
-              <div className="bg-[#4F5AE5]/50 py-1 px-2 md:px-3 rounded-lg flex items-center">
+              <div className="bg-white/30 py-1 px-2 md:px-3 rounded-lg flex items-center hover:bg-white/40 transition-colors">
                 <input
                   type="text"
                   value={formatNumber(initialPayment)}
@@ -193,16 +193,16 @@ const MainPageCalculator: React.FC = () => {
             <div className="relative mb-2">
               <input
                 type="range"
-                min="3"
-                max="12"
+                min="1"
+                max="9"
                 step="1"
                 value={term}
                 onChange={handleTermChange}
                 className="w-full h-1 bg-white/30 rounded-lg appearance-none cursor-pointer slider-input"
               />
               <div className="flex justify-between mt-1 mb-2 text-xs text-white/60">
-                <span>3 мес</span>
-                <span>12 мес</span>
+                <span>1 мес</span>
+                <span>9 мес</span>
               </div>
             </div>
           </div>

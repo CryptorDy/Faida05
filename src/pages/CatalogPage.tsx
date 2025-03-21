@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+// @ts-ignore - В версии react-router-dom 7.x типы могут отличаться от фактических экспортов
 import { Link } from 'react-router-dom';
 import { ArrowRight, Tag, Clock } from 'lucide-react';
 import { useProducts, useProductsByCategory } from '../hooks/useProducts';
@@ -10,6 +11,11 @@ const CatalogPage: React.FC = () => {
   
   const loading = categoriesLoading || productsLoading;
   const error = categoriesError || productsError;
+
+  // Функция для расчета ежемесячного платежа
+  const calculateMonthlyPayment = (price: number, months: number = 9) => {
+    return Math.ceil(price / months);
+  };
 
   if (loading) {
     return (
@@ -101,9 +107,13 @@ const CatalogPage: React.FC = () => {
             {/* Product image with overlay on hover */}
             <div className="relative h-56 overflow-hidden bg-gray-100">
               <img 
-                src={product.image} 
+                src={product.imageUrl} 
                 alt={product.name} 
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                onError={(e) => {
+                  // Fallback image if the product image fails to load
+                  (e.target as HTMLImageElement).src = 'https://placehold.co/600x400?text=Нет+изображения';
+                }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
                 <div className="p-4 w-full">
@@ -118,7 +128,7 @@ const CatalogPage: React.FC = () => {
               <div className="absolute top-3 left-3">
                 <span className="bg-indigo-600 text-white text-xs font-medium px-2 py-1 rounded-full flex items-center">
                   <Tag className="h-3 w-3 mr-1" />
-                  {product.category}
+                  {product.categoryName || 'Товар'}
                 </span>
               </div>
             </div>
@@ -137,7 +147,7 @@ const CatalogPage: React.FC = () => {
               {/* Price section */}
               <div className="mt-auto">
                 <div className="flex justify-between items-center mb-2">
-                  <div className="text-xl font-bold text-indigo-600">{product.price.toLocaleString()} ₽</div>
+                  <div className="text-xl font-bold text-indigo-600">{product.price.toLocaleString('ru-RU')} ₽</div>
                   <div className="bg-indigo-50 text-indigo-700 text-xs font-medium px-2 py-1 rounded">
                     Рассрочка
                   </div>
@@ -146,7 +156,7 @@ const CatalogPage: React.FC = () => {
                 {/* Monthly payment */}
                 <div className="flex items-center text-sm text-gray-500">
                   <Clock className="h-4 w-4 mr-1 text-indigo-400" />
-                  от {Math.round(product.price / 9).toLocaleString()} ₽/мес на 9 мес
+                  от {calculateMonthlyPayment(product.price).toLocaleString('ru-RU')} ₽/мес на 9 мес
                 </div>
               </div>
             </div>
@@ -164,6 +174,14 @@ const CatalogPage: React.FC = () => {
       {displayProducts.length === 0 && !loading && (
         <div className="text-center py-12">
           <p className="text-gray-500 text-lg">Товары не найдены</p>
+          {activeCategoryId !== null && (
+            <button 
+              onClick={() => setActiveCategoryId(null)}
+              className="mt-4 text-indigo-600 hover:text-indigo-800 font-medium"
+            >
+              Показать все товары
+            </button>
+          )}
         </div>
       )}
     </div>

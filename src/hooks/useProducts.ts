@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { fetchCategories, fetchProducts, fetchProductsByCategory, fetchProductById, fetchPopularProducts } from '../services/api';
-import { Product, Category } from '../data/products';
+import { ApiService } from '../services/api';
+import { Product, Category } from '../types/api';
 
 export const useProducts = () => {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -11,12 +11,12 @@ export const useProducts = () => {
     const getCategories = async () => {
       try {
         setLoading(true);
-        const data = await fetchCategories();
+        const data = await ApiService.getAllCategoriesAsync();
         setCategories(data);
         setError(null);
       } catch (err) {
         setError('Не удалось загрузить категории. Пожалуйста, попробуйте позже.');
-        console.error('Error fetching categories:', err);
+        console.error('Ошибка при загрузке категорий:', err);
       } finally {
         setLoading(false);
       }
@@ -38,13 +38,13 @@ export const useProductsByCategory = (categoryId: number | null) => {
       try {
         setLoading(true);
         const data = categoryId 
-          ? await fetchProductsByCategory(categoryId)
-          : await fetchProducts();
+          ? await ApiService.getProductsByCategoryAsync(categoryId)
+          : await ApiService.getAllProductsAsync();
         setProducts(data);
         setError(null);
       } catch (err) {
         setError('Не удалось загрузить товары. Пожалуйста, попробуйте позже.');
-        console.error('Error fetching products:', err);
+        console.error('Ошибка при загрузке товаров:', err);
       } finally {
         setLoading(false);
       }
@@ -71,16 +71,18 @@ export const useProduct = (id: string | undefined) => {
 
       try {
         setLoading(true);
-        const data = await fetchProductById(parseInt(id));
-        if (data) {
-          setProduct(data);
-          setError(null);
-        } else {
-          setError('Товар не найден');
+        const productId = parseInt(id, 10);
+        if (isNaN(productId)) {
+          setError('Неверный формат идентификатора товара');
+          return;
         }
+        
+        const data = await ApiService.getProductByIdAsync(productId);
+        setProduct(data);
+        setError(null);
       } catch (err) {
         setError('Не удалось загрузить информацию о товаре. Пожалуйста, попробуйте позже.');
-        console.error('Error fetching product:', err);
+        console.error('Ошибка при загрузке товара:', err);
       } finally {
         setLoading(false);
       }
@@ -92,7 +94,7 @@ export const useProduct = (id: string | undefined) => {
   return { product, loading, error };
 };
 
-export const usePopularProducts = (limit: number = 4) => {
+export const usePopularProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -101,19 +103,19 @@ export const usePopularProducts = (limit: number = 4) => {
     const getPopularProducts = async () => {
       try {
         setLoading(true);
-        const data = await fetchPopularProducts(limit);
+        const data = await ApiService.getPopularProductsAsync();
         setProducts(data);
         setError(null);
       } catch (err) {
         setError('Не удалось загрузить популярные товары. Пожалуйста, попробуйте позже.');
-        console.error('Error fetching popular products:', err);
+        console.error('Ошибка при загрузке популярных товаров:', err);
       } finally {
         setLoading(false);
       }
     };
 
     getPopularProducts();
-  }, [limit]);
+  }, []);
 
   return { products, loading, error };
 };

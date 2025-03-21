@@ -1,7 +1,7 @@
 import React from 'react';
 // @ts-ignore - В версии react-router-dom 7.x типы могут отличаться от фактических экспортов
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Phone, User, ShoppingCart } from 'lucide-react';
+import { Phone } from 'lucide-react';
 import WhatsAppButton from './WhatsAppButton';
 
 const Layout: React.FC = () => {
@@ -50,19 +50,11 @@ const Layout: React.FC = () => {
               <div className="flex items-center space-x-3">
                 <a 
                   href="tel:+79634096111" 
-                  className="text-[#4A56E2] font-medium text-sm hover:text-[#3D47B3] hidden md:flex items-center"
+                  className="text-[#4A56E2] font-medium text-sm hover:text-[#3D47B3] flex items-center"
                 >
                   <Phone className="h-4 w-4 mr-1" />
                   +7 (963) 409-61-11
                 </a>
-                <div className="h-6 w-px bg-gray-300 hidden md:block"></div>
-                <button className="text-[#475569] hover:text-[#4A56E2]">
-                  <User className="h-5 w-5" />
-                </button>
-                <button className="text-[#475569] hover:text-[#4A56E2] relative">
-                  <ShoppingCart className="h-5 w-5" />
-                  <span className="absolute -top-1 -right-1 bg-[#4A56E2] text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">2</span>
-                </button>
               </div>
             </div>
           </div>

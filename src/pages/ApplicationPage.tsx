@@ -15,7 +15,17 @@ interface ApplicationState {
 const ApplicationPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const calculatorData = location.state as ApplicationState;
+  const queryParams = new URLSearchParams(location.search);
+  
+  // Get params from URL
+  const productCost = Number(queryParams.get('productCost') || 0);
+  const initialPayment = Number(queryParams.get('initialPayment') || 0);
+  const term = Number(queryParams.get('term') || 3);
+  const markup = Number(queryParams.get('markup') || 0);
+  const totalCost = Number(queryParams.get('totalCost') || 0);
+  const monthlyPayment = Number(queryParams.get('monthlyPayment') || 0);
+  const productName = queryParams.get('productName') || '';
+  const productId = Number(queryParams.get('productId') || 0);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -28,12 +38,12 @@ const ApplicationPage: React.FC = () => {
     error: ''
   });
   
-  // Validate if we have calculator data
+  // Validate if we have product data
   useEffect(() => {
-    if (!calculatorData || !calculatorData.productPrice) {
+    if (!productCost || !productId) {
       navigate('/');
     }
-  }, [calculatorData, navigate]);
+  }, [productCost, productId, navigate]);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target as HTMLInputElement;
@@ -77,7 +87,7 @@ const ApplicationPage: React.FC = () => {
   };
 
   const formatNumber = (num: number) => {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    return num.toLocaleString('ru-RU');
   };
   
   if (formData.isSubmitted) {
@@ -102,8 +112,13 @@ const ApplicationPage: React.FC = () => {
     );
   }
   
-  if (!calculatorData) {
-    return <div className="p-8 text-center">Загрузка...</div>;
+  if (!productCost || !productId) {
+    return (
+      <div className="w-full px-4 py-12 text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+        <p className="text-gray-600 mt-4">Загрузка данных...</p>
+      </div>
+    );
   }
   
   return (
@@ -231,13 +246,20 @@ const ApplicationPage: React.FC = () => {
               Параметры рассрочки
             </h2>
             
+            {productName && (
+              <div className="flex items-center py-2 border-b border-gray-100 mb-4">
+                <ShoppingBag className="h-4 w-4 text-indigo-500 mr-2" />
+                <span className="text-sm text-gray-600 font-medium">{productName}</span>
+              </div>
+            )}
+            
             <div className="space-y-4">
               <div className="flex justify-between items-center py-2 border-b border-gray-100">
                 <div className="flex items-center">
                   <span className="h-4 w-4 text-indigo-500 mr-2 font-medium">₽</span>
                   <span className="text-sm text-gray-600">Стоимость товара</span>
                 </div>
-                <span className="font-medium">{formatNumber(calculatorData.productPrice)} ₽</span>
+                <span className="font-medium">{formatNumber(productCost)} ₽</span>
               </div>
               
               <div className="flex justify-between items-center py-2 border-b border-gray-100">
@@ -245,7 +267,7 @@ const ApplicationPage: React.FC = () => {
                   <CreditCard className="h-4 w-4 text-indigo-500 mr-2" />
                   <span className="text-sm text-gray-600">Первоначальный взнос</span>
                 </div>
-                <span className="font-medium">{formatNumber(calculatorData.initialPayment)} ₽</span>
+                <span className="font-medium">{formatNumber(initialPayment)} ₽</span>
               </div>
               
               <div className="flex justify-between items-center py-2 border-b border-gray-100">
@@ -253,28 +275,28 @@ const ApplicationPage: React.FC = () => {
                   <Calendar className="h-4 w-4 text-indigo-500 mr-2" />
                   <span className="text-sm text-gray-600">Срок рассрочки</span>
                 </div>
-                <span className="font-medium">{calculatorData.term} {getMonthText(calculatorData.term)}</span>
+                <span className="font-medium">{term} {getMonthText(term)}</span>
               </div>
               
               <div className="flex justify-between items-center py-2 border-b border-gray-100">
                 <div className="flex items-center">
-                  <span className="h-4 w-4 text-indigo-500 mr-2 font-medium">₽</span>
-                  <span className="text-sm text-gray-600">Торговая наценка</span>
+                  <span className="h-4 w-4 text-indigo-500 mr-2 font-medium">%</span>
+                  <span className="text-sm text-gray-600">Наценка</span>
                 </div>
-                <span className="font-medium">{formatNumber(calculatorData.markupAmount)} ₽</span>
+                <span className="font-medium">{formatNumber(markup)} ₽</span>
               </div>
               
               <div className="flex justify-between items-center py-2 border-b border-gray-100">
                 <div className="flex items-center">
-                  <span className="h-4 w-4 text-indigo-500 mr-2 font-medium">₽</span>
-                  <span className="text-sm text-gray-600">Общая стоимость</span>
+                  <Calendar className="h-4 w-4 text-indigo-500 mr-2" />
+                  <span className="text-sm text-gray-600">Ежемесячный платеж</span>
                 </div>
-                <span className="font-medium">{formatNumber(calculatorData.totalAmount)} ₽</span>
+                <span className="font-medium">{formatNumber(monthlyPayment)} ₽</span>
               </div>
               
-              <div className="bg-indigo-50 p-4 rounded-xl mt-4">
-                <div className="text-sm text-indigo-800 mb-1">Ежемесячный платеж</div>
-                <div className="text-2xl font-bold text-indigo-700">{formatNumber(calculatorData.monthlyPayment)} ₽</div>
+              <div className="flex justify-between items-center py-3 bg-indigo-50 px-3 rounded-lg mt-6">
+                <span className="font-medium">Итого к оплате:</span>
+                <span className="font-bold text-lg text-indigo-600">{formatNumber(totalCost)} ₽</span>
               </div>
             </div>
           </div>

@@ -2,6 +2,7 @@ import React from 'react';
 // @ts-ignore - В версии react-router-dom 7.x типы могут отличаться от фактических экспортов
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Phone, User, ShoppingCart } from 'lucide-react';
+import WhatsAppButton from './WhatsAppButton';
 
 const Layout: React.FC = () => {
   const location = useLocation();
@@ -127,8 +128,7 @@ const Layout: React.FC = () => {
             <div>
               <h4 className="font-semibold mb-4 text-white text-sm">Информация</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="text-gray-400 hover:text-white">О компании</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white">Условия рассрочки</a></li>
+                <li><Link to="/about" className="text-gray-400 hover:text-white">О компании</Link></li>
                 <li><Link to="/privacy" className="text-gray-400 hover:text-white">Политика конфиденциальности</Link></li>
                 <li><Link to="/terms" className="text-gray-400 hover:text-white">Пользовательское соглашение</Link></li>
               </ul>
@@ -140,6 +140,9 @@ const Layout: React.FC = () => {
           </div>
         </div>
       </footer>
+      
+      {/* WhatsApp Button */}
+      <WhatsAppButton />
     </div>
   );
 };

@@ -33,13 +33,6 @@ const HomePage: React.FC = () => {
                 </a>
               </div>
             </div>
-            <div className="hidden md:block">
-              <img 
-                src="https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2787&q=80" 
-                alt="Покупки в рассрочку" 
-                className="rounded-xl shadow-lg h-96 w-full object-cover"
-              />
-            </div>
           </div>
         </div>
       </div>

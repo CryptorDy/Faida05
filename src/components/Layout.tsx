@@ -90,6 +90,8 @@ const Layout: React.FC = () => {
                 <li><Link to="/" className="text-gray-400 hover:text-white">Главная</Link></li>
                 <li><Link to="/catalog" className="text-gray-400 hover:text-white">Каталог</Link></li>
                 <li><Link to="/contact" className="text-gray-400 hover:text-white">Контакты</Link></li>
+                <li><Link to="/terms" className="text-gray-400 hover:text-white">Пользовательское соглашение</Link></li>
+                <li><Link to="/privacy" className="text-gray-400 hover:text-white">Политика конфиденциальности</Link></li>
               </ul>
             </div>
             

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Shield, CreditCard, Calendar, DollarSign, User, Phone, Home, ShoppingBag, Check, ArrowLeft } from 'lucide-react';
+// @ts-ignore - В версии react-router-dom 7.x типы могут отличаться от фактических экспортов
+import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { Shield, CreditCard, Calendar, User, Phone, Home, ShoppingBag, Check, ArrowLeft } from 'lucide-react';
 
 interface ApplicationState {
   productPrice: number;
@@ -118,8 +119,8 @@ const ApplicationPage: React.FC = () => {
       
       <h1 className="text-3xl font-bold mb-8 text-center">Оформление заявки на рассрочку</h1>
       
-      <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="md:col-span-2">
+      <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-7 gap-8">
+        <div className="md:col-span-4">
           <div className="bg-white rounded-2xl shadow-md p-6">
             <h2 className="text-xl font-semibold mb-6">Персональные данные</h2>
             
@@ -198,7 +199,7 @@ const ApplicationPage: React.FC = () => {
                   </div>
                   <div className="ml-3 text-sm">
                     <label htmlFor="terms" className="font-medium text-gray-700">
-                      Я согласен с условиями рассрочки и обработки персональных данных
+                      Я согласен с <Link to="/terms" className="text-indigo-600 hover:text-indigo-800">условиями рассрочки</Link> и <Link to="/privacy" className="text-indigo-600 hover:text-indigo-800">политикой обработки персональных данных</Link>
                     </label>
                   </div>
                 </div>
@@ -223,7 +224,7 @@ const ApplicationPage: React.FC = () => {
           </div>
         </div>
         
-        <div className="md:col-span-1">
+        <div className="md:col-span-3">
           <div className="bg-white rounded-2xl shadow-md p-6 sticky top-6">
             <h2 className="text-lg font-semibold mb-4 flex items-center">
               <Shield className="h-5 w-5 text-indigo-600 mr-2" />
@@ -233,7 +234,7 @@ const ApplicationPage: React.FC = () => {
             <div className="space-y-4">
               <div className="flex justify-between items-center py-2 border-b border-gray-100">
                 <div className="flex items-center">
-                  <DollarSign className="h-4 w-4 text-indigo-500 mr-2" />
+                  <span className="h-4 w-4 text-indigo-500 mr-2 font-medium">₽</span>
                   <span className="text-sm text-gray-600">Стоимость товара</span>
                 </div>
                 <span className="font-medium">{formatNumber(calculatorData.productPrice)} ₽</span>
@@ -257,7 +258,7 @@ const ApplicationPage: React.FC = () => {
               
               <div className="flex justify-between items-center py-2 border-b border-gray-100">
                 <div className="flex items-center">
-                  <DollarSign className="h-4 w-4 text-indigo-500 mr-2" />
+                  <span className="h-4 w-4 text-indigo-500 mr-2 font-medium">₽</span>
                   <span className="text-sm text-gray-600">Торговая наценка</span>
                 </div>
                 <span className="font-medium">{formatNumber(calculatorData.markupAmount)} ₽</span>
@@ -265,7 +266,7 @@ const ApplicationPage: React.FC = () => {
               
               <div className="flex justify-between items-center py-2 border-b border-gray-100">
                 <div className="flex items-center">
-                  <DollarSign className="h-4 w-4 text-indigo-500 mr-2" />
+                  <span className="h-4 w-4 text-indigo-500 mr-2 font-medium">₽</span>
                   <span className="text-sm text-gray-600">Общая стоимость</span>
                 </div>
                 <span className="font-medium">{formatNumber(calculatorData.totalAmount)} ₽</span>

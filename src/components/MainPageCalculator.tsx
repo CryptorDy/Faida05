@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 // @ts-ignore - В версии react-router-dom 7.x типы могут отличаться от фактических экспортов
 import { Link } from 'react-router-dom';
-import { CreditCard, Calendar, Shield, DollarSign } from 'lucide-react';
+import { CreditCard, Calendar, Shield } from 'lucide-react';
 
 const MainPageCalculator: React.FC = () => {
   const [productPrice, setProductPrice] = useState(65000);
@@ -57,13 +57,17 @@ const MainPageCalculator: React.FC = () => {
     const validatedPrice = Math.min(500000, Math.max(1000, value));
     setProductPrice(validatedPrice);
     
-    // Adjust initial payment to be at most 50% of product price
-    const maxInitialPayment = validatedPrice * 0.5;
-    if (initialPayment > maxInitialPayment) {
-      setInitialPayment(maxInitialPayment);
+    // Корректируем первоначальный взнос, если он стал меньше минимального
+    const newMinInitialPayment = Math.round(validatedPrice * 0.25);
+    if (initialPayment < newMinInitialPayment) {
+      setInitialPayment(newMinInitialPayment);
     }
     
-    calculatePayments();
+    // Если первоначальный взнос больше 50% от стоимости товара, корректируем его
+    const maxInitialPayment = validatedPrice * 0.5;
+    if (initialPayment > maxInitialPayment) {
+      setInitialPayment(Math.round(maxInitialPayment));
+    }
   };
   
   // Обработчик изменения первоначального взноса через слайдер
@@ -103,7 +107,7 @@ const MainPageCalculator: React.FC = () => {
   }, [productPrice, initialPayment, term]);
   
   return (
-    <div className="bg-[#4A56E2] shadow-md rounded-2xl p-5">
+    <div className="bg-gradient-to-br from-[#454ee6] via-[#454ee6] to-[#9333ea] rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 text-white relative overflow-hidden">
       <div className="mb-4 md:mb-6 flex items-center">
         <Shield className="h-6 w-6 text-white mr-2" />
         <h2 className="text-xl font-bold text-white">Расчет рассрочки</h2>

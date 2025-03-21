@@ -264,7 +264,7 @@ const MainPageCalculator: React.FC = () => {
             background: white;
             cursor: pointer;
             box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
-            margin-top: -9px; /* Центрирование ползунка по вертикали */
+            margin-top: -9px; /* Точное выравнивание ползунка по центру */
           }
           
           input[type=range].slider-input::-moz-range-thumb {
@@ -274,6 +274,22 @@ const MainPageCalculator: React.FC = () => {
             background: white;
             cursor: pointer;
             border: 2px solid rgba(255, 255, 255, 0.2);
+            transform: translateY(-50%); /* Выравнивание по центру для Firefox */
+            margin-top: 0; /* Убираем смещение для Firefox */
+          }
+          
+          input[type=range].slider-input::-webkit-slider-runnable-track {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            cursor: pointer;
+          }
+          
+          input[type=range].slider-input::-moz-range-track {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            cursor: pointer;
           }
         `}
       </style>

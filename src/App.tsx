@@ -9,6 +9,7 @@ import AboutPage from './pages/AboutPage'
 import ApplicationPage from './pages/ApplicationPage'
 import TermsPage from './pages/TermsPage'
 import PrivacyPage from './pages/PrivacyPage'
+import DebugPage from './pages/DebugPage'
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path="application" element={<ApplicationPage />} />
           <Route path="terms" element={<TermsPage />} />
           <Route path="privacy" element={<PrivacyPage />} />
+          <Route path="debug" element={<DebugPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

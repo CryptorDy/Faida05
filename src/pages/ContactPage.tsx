@@ -45,8 +45,8 @@ const ContactPage: React.FC = () => {
                 <Mail className="h-6 w-6 text-indigo-600" />
               </div>
               <div>
-                <h3 className="font-medium text-gray-700">Email</h3>
-                <a href="mailto:info@rassrochka.plus" className="text-indigo-600 hover:underline text-lg">info@rassrochka.plus</a>
+                <h3 className="font-medium text-gray-700">Связаться с нами</h3>
+                <p className="text-indigo-600 text-lg">Используйте форму на сайте или мессенджеры</p>
               </div>
             </div>
             

@@ -1,18 +1,24 @@
 import React from 'react';
 // @ts-ignore - В версии react-router-dom 7.x типы могут отличаться от фактических экспортов
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 
 const PrivacyPage: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleGoBack = () => {
+    navigate(-1); // Возвращаемся на предыдущую страницу
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <Link 
-        to="/"
+      <button 
+        onClick={handleGoBack}
         className="flex items-center text-indigo-600 hover:text-indigo-800 mb-6 transition-colors"
       >
         <ArrowLeft className="h-5 w-5 mr-1" />
-        <span>На главную</span>
-      </Link>
+        <span>Назад</span>
+      </button>
 
       <h1 className="text-3xl font-bold mb-8">Политика конфиденциальности</h1>
       
@@ -117,7 +123,7 @@ const PrivacyPage: React.FC = () => {
           </p>
           
           <p className="mb-4">
-            6.2. Все предложения или вопросы по настоящей Политике следует направлять на электронную почту info@faida.ru или по телефону +7 (963) 409-61-11.
+            6.2. Все предложения или вопросы по настоящей Политике следует направлять через форму обратной связи на сайте или по телефону +7 (963) 409-61-11.
           </p>
           
           <p className="mb-4">

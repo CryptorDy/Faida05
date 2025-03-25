@@ -3,11 +3,13 @@ export interface Product {
   name: string;
   description: string;
   price: number;
-  imageUrl: string;
+  imageUrl?: string;
+  imagePath?: string;
+  code?: string;
   categoryId: number;
   categoryName?: string;
   isPopular: boolean;
-  inStock: boolean;
+  inStock?: boolean;
   attributes?: Record<string, string>;
 }
 
@@ -17,6 +19,7 @@ export interface Category {
   description?: string;
   imageUrl?: string;
   parentId?: number;
+  productCount?: number;
 }
 
 export interface ApiResponse<T> {
@@ -24,4 +27,13 @@ export interface ApiResponse<T> {
   data: T;
   message?: string;
   errors?: string[];
+}
+
+export interface ApplicationDto {
+  fullName: string;
+  productId?: number;
+  address?: string;
+  phone: string;
+  firstPayment: number;
+  countMonth: number;
 } 

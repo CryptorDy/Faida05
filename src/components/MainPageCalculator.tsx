@@ -232,14 +232,7 @@ const MainPageCalculator: React.FC = () => {
             </div>
           </div>
           
-          <Link to="/application" state={{ 
-            productPrice, 
-            initialPayment, 
-            term, 
-            markupAmount, 
-            totalAmount, 
-            monthlyPayment 
-          }} className="w-full bg-[#4A56E2] hover:bg-[#3D47B3] transition-colors text-white font-medium py-3 px-4 rounded-lg mt-5 text-center">
+          <Link to={`/application?productCost=${productPrice}&initialPayment=${initialPayment}&term=${term}&markup=${markupAmount}&totalCost=${totalAmount}&monthlyPayment=${monthlyPayment}&productId=1`} className="w-full bg-[#4A56E2] hover:bg-[#3D47B3] transition-colors text-white font-medium py-3 px-4 rounded-lg mt-5 text-center">
             Оформить заявку
           </Link>
         </div>

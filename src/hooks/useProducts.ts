@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ApiService } from '../services/api';
 import { Product, Category } from '../types/api';
 
@@ -118,4 +118,60 @@ export const usePopularProducts = () => {
   }, []);
 
   return { products, loading, error };
+};
+
+/**
+ * Оптимизированный хук для работы с товарами и категориями
+ * Загружает все товары один раз и фильтрует их на стороне клиента
+ */
+export const useProductsOptimized = () => {
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Загрузка всех товаров и категорий один раз при инициализации
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        
+        // Параллельная загрузка товаров и категорий для ускорения
+        const [productsData, categoriesData] = await Promise.all([
+          ApiService.getAllProductsAsync(),
+          ApiService.getAllCategoriesAsync()
+        ]);
+        
+        setAllProducts(productsData);
+        setCategories(categoriesData);
+        setError(null);
+      } catch (err) {
+        setError('Не удалось загрузить данные. Пожалуйста, попробуйте позже.');
+        console.error('Ошибка при загрузке данных:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  // Фильтрация товаров по выбранной категории
+  const filteredProducts = useMemo(() => {
+    if (selectedCategoryId === null) {
+      return allProducts; // Возвращаем все товары, если категория не выбрана
+    }
+    return allProducts.filter(product => product.categoryId === selectedCategoryId);
+  }, [allProducts, selectedCategoryId]);
+
+  return {
+    products: filteredProducts,
+    categories,
+    loading,
+    error,
+    selectedCategoryId,
+    setSelectedCategoryId,
+    allProducts
+  };
 };

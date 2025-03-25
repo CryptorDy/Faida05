@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 // @ts-ignore - В версии react-router-dom 7.x типы могут отличаться от фактических экспортов
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { Shield, CreditCard, Calendar, User, Phone, Home, ShoppingBag, Check, ArrowLeft } from 'lucide-react';
+import { ApiService } from '../services/api';
+import { ApplicationDto } from '../types/api';
+import { handlePhoneInput } from '../utils/formatters';
 
 interface ApplicationState {
   productPrice: number;
@@ -35,7 +38,8 @@ const ApplicationPage: React.FC = () => {
     agreeToTerms: false,
     isSubmitting: false,
     isSubmitted: false,
-    error: ''
+    error: '',
+    apiError: ''
   });
   
   // Validate if we have product data
@@ -49,10 +53,23 @@ const ApplicationPage: React.FC = () => {
     const { name, value, type } = e.target as HTMLInputElement;
     const checked = type === 'checkbox' ? (e.target as HTMLInputElement).checked : undefined;
     
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+    // Если это не телефон, используем обычную обработку
+    if (name !== 'phone') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value
+      }));
+    }
+  };
+  
+  // Отдельный обработчик для ввода телефона с форматированием
+  const handlePhoneInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handlePhoneInput(e, (formattedValue) => {
+      setFormData(prev => ({
+        ...prev,
+        phone: formattedValue
+      }));
+    });
   };
   
   const handleSubmit = async (e: React.FormEvent) => {
@@ -69,17 +86,38 @@ const ApplicationPage: React.FC = () => {
     setFormData(prev => ({
       ...prev,
       isSubmitting: true,
-      error: ''
+      error: '',
+      apiError: ''
     }));
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Подготовка данных для отправки
+      const applicationData: ApplicationDto = {
+        fullName: formData.fullName,
+        productId: productId,
+        address: formData.residenceAddress,
+        phone: formData.phone,
+        firstPayment: initialPayment,
+        countMonth: term
+      };
+      
+      // Отправка заявки через API
+      await ApiService.submitApplicationAsync(applicationData);
+      
       setFormData(prev => ({
         ...prev,
         isSubmitting: false,
         isSubmitted: true
       }));
-    }, 1500);
+    } catch (error) {
+      console.error('Ошибка при отправке заявки:', error);
+      
+      setFormData(prev => ({
+        ...prev,
+        isSubmitting: false,
+        apiError: error instanceof Error ? error.message : 'Произошла ошибка при отправке заявки'
+      }));
+    }
   };
   
   const handleGoBack = () => {
@@ -173,10 +211,10 @@ const ApplicationPage: React.FC = () => {
                       type="tel"
                       name="phone"
                       value={formData.phone}
-                      onChange={handleInputChange}
+                      onChange={handlePhoneInputChange}
                       required
                       className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-indigo-500 focus:border-indigo-500"
-                      placeholder="+7 (999) 123-45-67"
+                      placeholder="+7 (___) ___-__-__"
                     />
                   </div>
                 </div>
@@ -223,6 +261,12 @@ const ApplicationPage: React.FC = () => {
                   <div className="text-red-500 text-sm">{formData.error}</div>
                 )}
                 
+                {formData.apiError && (
+                  <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">
+                    {formData.apiError}
+                  </div>
+                )}
+                
                 <button
                   type="submit"
                   disabled={formData.isSubmitting}
@@ -249,55 +293,54 @@ const ApplicationPage: React.FC = () => {
             {productName && (
               <div className="flex items-center py-2 border-b border-gray-100 mb-4">
                 <ShoppingBag className="h-4 w-4 text-indigo-500 mr-2" />
-                <span className="text-sm text-gray-600 font-medium">{productName}</span>
+                <div className="text-sm text-gray-600 mr-2">Товар:</div>
+                <div className="font-medium text-sm">{productName}</div>
               </div>
             )}
             
-            <div className="space-y-4">
-              <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                <div className="flex items-center">
-                  <span className="h-4 w-4 text-indigo-500 mr-2 font-medium">₽</span>
-                  <span className="text-sm text-gray-600">Стоимость товара</span>
-                </div>
-                <span className="font-medium">{formatNumber(productCost)} ₽</span>
+            <div className="flex justify-between items-center py-2 border-b border-gray-100">
+              <div className="flex items-center">
+                <CreditCard className="h-4 w-4 text-indigo-500 mr-2" />
+                <span className="text-sm text-gray-600">Стоимость товара</span>
               </div>
-              
-              <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                <div className="flex items-center">
-                  <CreditCard className="h-4 w-4 text-indigo-500 mr-2" />
-                  <span className="text-sm text-gray-600">Первоначальный взнос</span>
-                </div>
-                <span className="font-medium">{formatNumber(initialPayment)} ₽</span>
+              <span className="font-medium">{formatNumber(productCost)} ₽</span>
+            </div>
+            
+            <div className="flex justify-between items-center py-2 border-b border-gray-100">
+              <div className="flex items-center">
+                <CreditCard className="h-4 w-4 text-indigo-500 mr-2" />
+                <span className="text-sm text-gray-600">Первоначальный взнос</span>
               </div>
-              
-              <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                <div className="flex items-center">
-                  <Calendar className="h-4 w-4 text-indigo-500 mr-2" />
-                  <span className="text-sm text-gray-600">Срок рассрочки</span>
-                </div>
-                <span className="font-medium">{term} {getMonthText(term)}</span>
+              <span className="font-medium">{formatNumber(initialPayment)} ₽</span>
+            </div>
+            
+            <div className="flex justify-between items-center py-2 border-b border-gray-100">
+              <div className="flex items-center">
+                <Calendar className="h-4 w-4 text-indigo-500 mr-2" />
+                <span className="text-sm text-gray-600">Срок рассрочки</span>
               </div>
-              
-              <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                <div className="flex items-center">
-                  <span className="h-4 w-4 text-indigo-500 mr-2 font-medium">%</span>
-                  <span className="text-sm text-gray-600">Наценка</span>
-                </div>
-                <span className="font-medium">{formatNumber(markup)} ₽</span>
+              <span className="font-medium">{term} {getMonthText(term)}</span>
+            </div>
+            
+            <div className="flex justify-between items-center py-2 border-b border-gray-100">
+              <div className="flex items-center">
+                <span className="h-4 w-4 text-indigo-500 mr-2 font-medium">%</span>
+                <span className="text-sm text-gray-600">Наценка</span>
               </div>
-              
-              <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                <div className="flex items-center">
-                  <Calendar className="h-4 w-4 text-indigo-500 mr-2" />
-                  <span className="text-sm text-gray-600">Ежемесячный платеж</span>
-                </div>
-                <span className="font-medium">{formatNumber(monthlyPayment)} ₽</span>
+              <span className="font-medium">{formatNumber(markup)} ₽</span>
+            </div>
+            
+            <div className="flex justify-between items-center py-2 border-b border-gray-100">
+              <div className="flex items-center">
+                <Calendar className="h-4 w-4 text-indigo-500 mr-2" />
+                <span className="text-sm text-gray-600">Ежемесячный платеж</span>
               </div>
-              
-              <div className="flex justify-between items-center py-3 bg-indigo-50 px-3 rounded-lg mt-6">
-                <span className="font-medium">Итого к оплате:</span>
-                <span className="font-bold text-lg text-indigo-600">{formatNumber(totalCost)} ₽</span>
-              </div>
+              <span className="font-medium">{formatNumber(monthlyPayment)} ₽</span>
+            </div>
+            
+            <div className="flex justify-between items-center py-3 bg-indigo-50 px-3 rounded-lg mt-6">
+              <span className="font-medium">Итого к оплате:</span>
+              <span className="font-bold text-lg text-indigo-600">{formatNumber(totalCost)} ₽</span>
             </div>
           </div>
         </div>
@@ -306,10 +349,11 @@ const ApplicationPage: React.FC = () => {
   );
 };
 
-function getMonthText(months: number): string {
+// Склонение слова "месяц" в зависимости от числа
+const getMonthText = (months: number) => {
   if (months === 1) return 'месяц';
   if (months >= 2 && months <= 4) return 'месяца';
   return 'месяцев';
-}
+};
 
 export default ApplicationPage;

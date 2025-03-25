@@ -1,17 +1,19 @@
-import React, { useState } from 'react';
+import React from 'react';
 // @ts-ignore - В версии react-router-dom 7.x типы могут отличаться от фактических экспортов
 import { Link } from 'react-router-dom';
 import { ArrowRight, Tag, Clock } from 'lucide-react';
-import { useProducts, useProductsByCategory } from '../hooks/useProducts';
+import { useProductsOptimized } from '../hooks/useProducts';
 
 const CatalogPage: React.FC = () => {
-  const { categories, loading: categoriesLoading, error: categoriesError } = useProducts();
-  const [activeCategoryId, setActiveCategoryId] = useState<number | null>(null);
-  const { products: displayProducts, loading: productsLoading, error: productsError } = useProductsByCategory(activeCategoryId);
+  const { 
+    products: displayProducts,
+    categories, 
+    loading, 
+    error, 
+    selectedCategoryId, 
+    setSelectedCategoryId 
+  } = useProductsOptimized();
   
-  const loading = categoriesLoading || productsLoading;
-  const error = categoriesError || productsError;
-
   // Функция для расчета ежемесячного платежа
   const calculateMonthlyPayment = (price: number, months: number = 9) => {
     return Math.ceil(price / months);
@@ -71,11 +73,11 @@ const CatalogPage: React.FC = () => {
         <div className="flex flex-wrap gap-2">
           <button 
             className={`px-4 py-2 rounded-full text-sm font-medium ${
-              activeCategoryId === null 
+              selectedCategoryId === null 
                 ? 'bg-indigo-600 text-white' 
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
-            onClick={() => setActiveCategoryId(null)}
+            onClick={() => setSelectedCategoryId(null)}
           >
             Все категории
           </button>
@@ -84,11 +86,11 @@ const CatalogPage: React.FC = () => {
             <button
               key={category.id}
               className={`px-4 py-2 rounded-full text-sm font-medium ${
-                activeCategoryId === category.id 
+                selectedCategoryId === category.id 
                   ? 'bg-indigo-600 text-white' 
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
-              onClick={() => setActiveCategoryId(category.id)}
+              onClick={() => setSelectedCategoryId(category.id)}
             >
               {category.name}
             </button>
@@ -174,9 +176,9 @@ const CatalogPage: React.FC = () => {
       {displayProducts.length === 0 && !loading && (
         <div className="text-center py-12">
           <p className="text-gray-500 text-lg">Товары не найдены</p>
-          {activeCategoryId !== null && (
+          {selectedCategoryId !== null && (
             <button 
-              onClick={() => setActiveCategoryId(null)}
+              onClick={() => setSelectedCategoryId(null)}
               className="mt-4 text-indigo-600 hover:text-indigo-800 font-medium"
             >
               Показать все товары

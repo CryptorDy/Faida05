@@ -1,18 +1,24 @@
 import React from 'react';
 // @ts-ignore - В версии react-router-dom 7.x типы могут отличаться от фактических экспортов
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 
 const TermsPage: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleGoBack = () => {
+    navigate(-1); // Возвращаемся на предыдущую страницу
+  };
+  
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <Link 
-        to="/"
+      <button 
+        onClick={handleGoBack}
         className="flex items-center text-indigo-600 hover:text-indigo-800 mb-6 transition-colors"
       >
         <ArrowLeft className="h-5 w-5 mr-1" />
-        <span>На главную</span>
-      </Link>
+        <span>Назад</span>
+      </button>
 
       <h1 className="text-3xl font-bold mb-8">Пользовательское соглашение</h1>
       
@@ -21,7 +27,7 @@ const TermsPage: React.FC = () => {
           <h2 className="text-xl font-semibold mb-4">1. Общие положения</h2>
           
           <p className="mb-4">
-            1.1. Настоящее Пользовательское соглашение (далее — «Соглашение») регламентирует отношения между ООО «Файда» (далее — «Компания») и пользователем сети Интернет (далее — «Пользователь») по использованию сервиса FAIDA.
+            1.1. Настоящее Пользовательское соглашение (далее — «Соглашение») регламентирует отношения между ООО «Фаида» (далее — «Компания») и пользователем сети Интернет (далее — «Пользователь») по использованию сервиса FAIDA.
           </p>
           
           <p className="mb-4">
@@ -71,7 +77,7 @@ const TermsPage: React.FC = () => {
           <h2 className="text-xl font-semibold mb-4 mt-8">4. Условия предоставления рассрочки</h2>
           
           <p className="mb-4">
-            4.1. Рассрочка предоставляется на срок от 3 до 12 месяцев.
+            4.1. Рассрочка предоставляется на срок от 1 до 9 месяцев.
           </p>
           
           <p className="mb-4">
@@ -79,14 +85,8 @@ const TermsPage: React.FC = () => {
           </p>
           
           <p className="mb-4">
-            4.3. Процентная ставка за пользование рассрочкой:
+            4.3. Процентная ставка за пользование рассрочкой рассчитывается на основе стоимости товара, срока рассрочки и первого взноса.
           </p>
-          
-          <ul className="list-disc ml-8 mb-4">
-            <li>3% в первый месяц;</li>
-            <li>2% во второй месяц;</li>
-            <li>1% в третий и последующие месяцы.</li>
-          </ul>
           
           <p className="mb-4">
             4.4. Компания оставляет за собой право изменять условия предоставления рассрочки. Актуальные условия всегда доступны на сайте.

@@ -31,9 +31,27 @@ export default defineConfig({
             // Добавляем заголовки для обхода потенциальных ограничений CORS и аутентификации
             proxyReq.setHeader('Accept', 'application/json');
             proxyReq.setHeader('X-Requested-With', 'XMLHttpRequest');
+            
+            // Добавляем заголовки для отключения кеширования
+            proxyReq.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+            proxyReq.setHeader('Pragma', 'no-cache');
+            proxyReq.setHeader('Expires', '0');
+            
+            // Удаляем заголовки условного запроса, которые могут приводить к 304
+            if (req.headers['if-none-match']) {
+              proxyReq.removeHeader('if-none-match');
+            }
+            if (req.headers['if-modified-since']) {
+              proxyReq.removeHeader('if-modified-since');
+            }
           });
           proxy.on('proxyRes', (proxyRes, req, _res) => {
             console.log('Received Response from:', req.url, proxyRes.statusCode);
+            
+            // Если получен статус 304, логируем это
+            if (proxyRes.statusCode === 304) {
+              console.warn('Получен статус 304 для запроса:', req.url);
+            }
           });
         }
       }

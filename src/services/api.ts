@@ -1,5 +1,6 @@
 import { Product, Category, ApiResponse, ApplicationDto } from '../types/api';
 import { adaptProduct, adaptProducts, adaptCategory, adaptCategories } from '../utils/adapters';
+import { fetchNoCache } from '../hooks/useNoCacheApi';
 
 /**
  * Базовые опции для всех fetch запросов
@@ -9,6 +10,9 @@ const fetchOptions: RequestInit = {
   headers: {
     'Accept': 'application/json',
     'X-Requested-With': 'XMLHttpRequest', // Помогает серверу определить AJAX запрос
+    'Cache-Control': 'no-cache, no-store, must-revalidate', // Отключаем кеширование
+    'Pragma': 'no-cache', // Для совместимости с HTTP/1.0
+    'Expires': '0' // Для старых прокси/браузеров
   }
 };
 
@@ -62,7 +66,7 @@ export class ApiService {
    */
   static async getAllProductsAsync(): Promise<Product[]> {
     try {
-      const response = await fetch(`/api/products`, fetchOptions);
+      const response = await fetchNoCache(`/api/products`, fetchOptions);
       
       if (!response.ok) {
         // Пытаемся получить текст ошибки и код статуса
@@ -85,7 +89,7 @@ export class ApiService {
    */
   static async getProductsByCategoryAsync(categoryId: number): Promise<Product[]> {
     try {
-      const response = await fetch(`/api/products/category/${categoryId}`, fetchOptions);
+      const response = await fetchNoCache(`/api/products/category/${categoryId}`, fetchOptions);
       
       if (!response.ok) {
         // Пытаемся получить текст ошибки и код статуса
@@ -108,7 +112,7 @@ export class ApiService {
    */
   static async getPopularProductsAsync(): Promise<Product[]> {
     try {
-      const response = await fetch(`/api/products/popular`, fetchOptions);
+      const response = await fetchNoCache(`/api/products/popular`, fetchOptions);
       
       if (!response.ok) {
         // Пытаемся получить текст ошибки и код статуса
@@ -131,7 +135,7 @@ export class ApiService {
    */
   static async getProductByIdAsync(id: number): Promise<Product> {
     try {
-      const response = await fetch(`/api/products/${id}`, fetchOptions);
+      const response = await fetchNoCache(`/api/products/${id}`, fetchOptions);
       
       if (!response.ok) {
         // Пытаемся получить текст ошибки и код статуса
@@ -154,7 +158,7 @@ export class ApiService {
    */
   static async getAllCategoriesAsync(): Promise<Category[]> {
     try {
-      const response = await fetch(`/api/categories`, fetchOptions);
+      const response = await fetchNoCache(`/api/categories`, fetchOptions);
       
       if (!response.ok) {
         // Пытаемся получить текст ошибки и код статуса
@@ -177,7 +181,7 @@ export class ApiService {
    */
   static async submitApplicationAsync(application: ApplicationDto): Promise<any> {
     try {
-      const response = await fetch(`/api/applications`, {
+      const response = await fetchNoCache(`/api/applications`, {
         ...fetchOptions,
         method: 'POST',
         headers: {

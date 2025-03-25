@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ApiClient from '../utils/ApiClient';
 import { ApiService } from '../services/api';
 import { adaptCategories, adaptProducts } from '../utils/adapters';
+import { fetchNoCache } from '../hooks/useNoCacheApi';
 
 const DebugPage: React.FC = () => {
   const [rawProducts, setRawProducts] = useState<any[]>([]);
@@ -17,18 +18,24 @@ const DebugPage: React.FC = () => {
       setError(null);
       
       try {
-        // Получение сырых данных напрямую через fetch
+        // Получение сырых данных напрямую через fetchNoCache вместо fetch
         const [productsResponse, categoriesResponse] = await Promise.all([
-          fetch('/api/products', {
+          fetchNoCache('/api/products', {
             headers: {
               'Accept': 'application/json',
-              'X-Requested-With': 'XMLHttpRequest'
+              'X-Requested-With': 'XMLHttpRequest',
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0'
             }
           }),
-          fetch('/api/categories', {
+          fetchNoCache('/api/categories', {
             headers: {
               'Accept': 'application/json',
-              'X-Requested-With': 'XMLHttpRequest'
+              'X-Requested-With': 'XMLHttpRequest',
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0'
             }
           })
         ]);
@@ -111,6 +118,38 @@ const DebugPage: React.FC = () => {
           <li>X-Requested-With: XMLHttpRequest</li>
           <li>credentials: include (для передачи куки)</li>
         </ul>
+      </div>
+      
+      <div className="mt-12 bg-red-50 p-6 rounded-lg shadow">
+        <h2 className="text-xl font-semibold mb-4">Решение проблемы с ошибкой 304 Not Modified</h2>
+        <p className="mb-4">
+          Для решения проблемы с кешированием запросов и ошибкой 304 были реализованы следующие меры:
+        </p>
+        <ul className="list-disc pl-6 mb-4 space-y-2">
+          <li>
+            <span className="font-semibold">Отключение кеширования:</span> Добавлены заголовки Cache-Control, Pragma и Expires для отключения кеширования.
+          </li>
+          <li>
+            <span className="font-semibold">Уникальные параметры запроса:</span> Каждый запрос получает уникальный параметр _nocache для предотвращения кеширования.
+          </li>
+          <li>
+            <span className="font-semibold">Настройка прокси:</span> Обновлена конфигурация прокси для предотвращения условных запросов.
+          </li>
+          <li>
+            <span className="font-semibold">Удаление условных заголовков:</span> Удаляются заголовки If-None-Match и If-Modified-Since, которые могут вызывать 304.
+          </li>
+        </ul>
+        
+        <h3 className="text-lg font-semibold mt-4 mb-2">Тестирование решения</h3>
+        <p className="mb-4">
+          Если вы все еще видите ошибку 304, попробуйте:
+        </p>
+        <ol className="list-decimal pl-6 mb-4 space-y-2">
+          <li>Очистить кеш браузера</li>
+          <li>Открыть сайт в режиме инкогнито</li>
+          <li>Обновить страницу с нажатой клавишей Shift</li>
+          <li>Проверить заголовки запросов в инструментах разработчика браузера</li>
+        </ol>
       </div>
       
       <div className="mt-12 bg-blue-50 p-6 rounded-lg shadow">
